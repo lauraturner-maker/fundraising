@@ -1,62 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <style>
     :root {
         --usc-cardinal: #990000;
         --usc-gold: #FFC72C;
-        --light-grey: #f4f4f4;
+        --light-grey: #f0f0f0;
+        --text-dark: #333333;
     }
 
     .usc-widget-container {
-        font-family: 'National', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        max-width: 400px;
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        max-width: 450px;
+        padding: 25px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
         background-color: #fff;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     .usc-header {
         color: var(--usc-cardinal);
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 15px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        border-bottom: 2px solid var(--usc-gold);
-        padding-bottom: 5px;
+    }
+
+    .gold-divider {
+        height: 2px;
+        background-color: var(--usc-gold);
+        width: 100%;
+        margin-bottom: 20px;
     }
 
     .goal-stats {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 10px;
-        font-size: 0.9rem;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        color: var(--text-dark);
     }
 
     .current-amount {
         font-weight: bold;
-        color: #333;
     }
 
-    /* The Progress Bar Background */
+    .goal-total {
+        font-weight: 400;
+    }
+
+    /* Progress Bar */
     .progress-track {
         background-color: var(--light-grey);
-        height: 25px;
-        border-radius: 12.5px;
+        height: 30px;
+        border-radius: 15px;
         width: 100%;
         overflow: hidden;
         margin-bottom: 15px;
     }
 
-    /* The Moving Bar */
     .progress-fill {
-        background: linear-gradient(90deg, var(--usc-cardinal), #ce0000);
+        background-color: var(--usc-cardinal);
         height: 100%;
-        width: 0%; /* Initial state for animation */
-        transition: width 1.5s ease-in-out;
+        width: 0%; /* Animated via JS */
+        transition: width 1.2s cubic-bezier(0.1, 0.5, 0.5, 1);
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -64,34 +73,39 @@
 
     .percentage-label {
         color: white;
-        font-size: 0.75rem;
+        font-size: 0.9rem;
         font-weight: bold;
-        padding-right: 10px;
+        padding-right: 15px;
     }
 
-    .usc-footer {
-        font-size: 0.8rem;
+    .usc-footer-text {
+        font-size: 0.95rem;
         color: #666;
         font-style: italic;
         text-align: center;
+        margin-bottom: 20px;
+        display: block;
     }
 
+    /* Full-width Button with Centered Text */
     .fight-on-btn {
         display: block;
         width: 100%;
-        padding: 10px;
-        margin-top: 15px;
+        box-sizing: border-box; /* Ensures padding doesn't affect width */
+        padding: 14px 0;
         background-color: var(--usc-cardinal);
         color: white;
         text-align: center;
         text-decoration: none;
-        font-weight: bold;
-        border-radius: 4px;
-        transition: background 0.3s;
+        font-size: 1.3rem;
+        font-weight: 900;
+        border-radius: 6px;
+        text-transform: uppercase;
+        transition: opacity 0.2s;
     }
 
     .fight-on-btn:hover {
-        background-color: #7a0000;
+        opacity: 0.9;
     }
 </style>
 </head>
@@ -99,10 +113,11 @@
 
 <div class="usc-widget-container">
     <div class="usc-header">Annual Giving Goal</div>
+    <div class="gold-divider"></div>
     
     <div class="goal-stats">
         <span class="current-amount" id="raised-text">$0</span>
-        <span class="goal-total">Goal: $5,000,000</span>
+        <span class="goal-total" id="goal-text">Goal: $5,000,000</span>
     </div>
 
     <div class="progress-track">
@@ -111,37 +126,33 @@
         </div>
     </div>
 
-    <div class="usc-footer">
-        Join the Trojan Family in making an impact.
-    </div>
+    <span class="usc-footer-text">Join the Trojan Family in making an impact.</span>
 
-    <a href="https://giving.usc.edu" target="_blank" class="fight-on-btn">FIGHT ON!</a>
+    <a href="https://giving.usc.edu" target="_blank" class="fight-on-btn">Fight On!</a>
 </div>
 
 <script>
-    // Configuration: Update these values
-    const goal = 5000000;
-    const raised = 3750000; // Example: 75% achieved
+    // Configuration
+    const goalVal = 5000000;
+    const raisedVal = 3750000;
     
-    // Calculation
-    const percentage = Math.min((raised / goal) * 100, 100);
+    const percentage = Math.min((raisedVal / goalVal) * 100, 100);
 
-    // Animation
     window.onload = () => {
         const bar = document.getElementById('progress-bar');
         const percText = document.getElementById('perc-text');
         const raisedText = document.getElementById('raised-text');
 
-        // Trigger CSS transition
+        // Apply width animation
         bar.style.width = percentage + '%';
         percText.innerText = Math.round(percentage) + '%';
         
-        // Format currency for the text display
+        // Format numbers for display
         raisedText.innerText = new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
             maximumFractionDigits: 0
-        }).format(raised);
+        }).format(raisedVal);
     };
 </script>
 
